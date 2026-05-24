@@ -25,12 +25,12 @@ def keep_alive():
 # DISCORD BOT BASIS
 # -----------------------------
 intents = discord.Intents.default()
-intents.message_content = True  # im Dev-Portal aktiv lassen!
+intents.message_content = True
 intents.reactions = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Set für Nachrichten, auf die sich ZwerBo schon bedankt hat
+# Nachrichten, auf die ZwerBo sich schon bedankt hat
 bereits_bedankt = set()
 
 # -----------------------------
@@ -52,7 +52,6 @@ async def ping(ctx):
 # -----------------------------
 # SLASH-COMMANDS – ZwerBo Persönlichkeit
 # -----------------------------
-
 @bot.tree.command(name="weisheit", description="ZwerBo teilt eine weise, leicht humorvolle Erkenntnis.")
 async def weisheit(interaction: discord.Interaction):
     texte = [
@@ -105,7 +104,7 @@ async def legende(interaction: discord.Interaction):
     await interaction.response.send_message(text)
 
 # -----------------------------
-# TRIGGER – Begrüßungen & Snacks
+# TRIGGER – Begrüßungen, Snacks & „Erzähl von dir“
 # -----------------------------
 @bot.event
 async def on_message(message):
@@ -127,7 +126,7 @@ async def on_message(message):
     if "gute nacht" in text:
         await message.channel.send("💤 *Schlafe gut. Ich halte Wache… meistens.*")
 
-    # Snacks & Getränke (mit oder ohne „bitte“)
+    # Snacks & Getränke
     if "kaffee" in text:
         await message.channel.send("☕ *Ein Schluck Wärme für deine Seele.*")
 
@@ -146,6 +145,27 @@ async def on_message(message):
     # ZwerBo direkt angesprochen
     if "zwerbo" in text:
         await message.channel.send("✨ *Ich bin hier… und lausche.*")
+
+    # ZwerBo soll etwas über sich erzählen
+    if any(wort in text for wort in [
+        "wer bist du",
+        "was bist du",
+        "erzähle von dir",
+        "erzähl von dir",
+        "zwerbo erzähl",
+        "zwerbo erzähle",
+        "zwerbo sag was",
+        "zwerbo sag etwas",
+        "zwerbo wer bist du"
+    ]):
+        antworten = [
+            "✨ *Ich bin ZwerBo, Hüter der Elemente… klein, aber erstaunlich organisiert.*",
+            "🌙 *Man nennt mich ZwerBo. Ich sortiere Chaos, beruhige Stürme und esse Kekse.*",
+            "🔥 *Ich bin ZwerBo. Halb Magie, halb Geduld, halb Humor… ja, das sind drei Hälften.*",
+            "💫 *Ich bin ein alter Runenhüter. Und trotzdem finde ich moderne Snacks faszinierend.*",
+            "🍃 *ZwerBo, zu Diensten. Ich höre den Elementen zu… und manchmal auch dir.*"
+        ]
+        await message.channel.send(random.choice(antworten))
 
     await bot.process_commands(message)
 
