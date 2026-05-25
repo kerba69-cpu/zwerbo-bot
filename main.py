@@ -117,7 +117,7 @@ async def orakel(interaction: discord.Interaction):
     await interaction.response.send_message(random.choice(texte))
 
 # -----------------------------
-# COMMUNITY-TRIGGER
+# COMMUNITY-TRIGGER (on_message)
 # -----------------------------
 @bot.event
 async def on_message(message):
@@ -126,7 +126,45 @@ async def on_message(message):
 
     text = message.content.lower()
 
-    # Begrüßungen
+    # -----------------------------------------
+    # AVATAR TRIGGER – eigener Avatar
+    # -----------------------------------------
+    if "zeige mir meinen avatar" in text or "zeig mir meinen avatar" in text:
+        user = message.author
+
+        embed = discord.Embed(
+            title=f"🖼️ Dein Avatar, {user.name}",
+            description="✨ *Ein Spiegel deiner Energie…*",
+            color=0x8A2BE2
+        )
+
+        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # AVATAR TRIGGER – anderer User
+    # -----------------------------------------
+    if ("zeige mir user avatar" in text or "zeig mir user avatar" in text) and message.mentions:
+        user = message.mentions[0]
+
+        embed = discord.Embed(
+            title=f"🖼️ Avatar von {user.name}",
+            description="✨ *Ein Bild voller Persönlichkeit…*",
+            color=0x8A2BE2
+        )
+
+        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # BEGRÜSSUNGEN
+    # -----------------------------------------
     if any(w in text for w in ["hallo", "hi", "hey", "moin", "servus"]):
         await message.channel.send("✨ *Ich grüße dich, Wanderer der Elemente.*")
 
@@ -139,6 +177,68 @@ async def on_message(message):
     if "gute nacht" in text:
         await message.channel.send("💤 *Schlafe gut.*")
 
+    # -----------------------------------------
+    # SNACKS
+    # -----------------------------------------
+    snacks = {
+        "kaffee": "☕ *Ein Schluck Wärme für deine Seele.*",
+        "kakao": "🍫 *Süß, warm und perfekt für ruhige Momente.*",
+        "schokolade": "🍫 *Schokolade… die beste Art, Magie zu essen.*",
+        "chips": "🍟 *Knuspern ist eine Form der Meditation.*",
+        "kuchen": "🍰 *Kuchen ist Liebe in Scheiben.*",
+        "tee": "🍵 *Tee beruhigt… außer man verschüttet ihn.*",
+        "pizza": "🍕 *Pizza… die wahre Form der Magie.*",
+        "bier": "🍺 *Möge es kalt sein und deine Sorgen warm vertreiben.*"
+    }
+
+    for wort, antwort in snacks.items():
+        if wort in text:
+            await message.channel.send(antwort)
+
+    # -----------------------------------------
+    # STIMMUNGEN
+    # -----------------------------------------
+    if "müde" in text:
+        await message.channel.send("😴 *Ich spüre deine Müdigkeit… ruh dich kurz aus.*")
+
+    if "langweilig" in text:
+        await message.channel.send("🍃 *Langeweile ist nur ein schlafendes Abenteuer.*")
+
+    if "traurig" in text:
+        await message.channel.send("💙 *Ich sende dir ein wenig Licht. Du bist nicht allein.*")
+
+    if "gestresst" in text:
+        await message.channel.send("💧 *Atme tief. Die Elemente stehen hinter dir.*")
+
+    if "freue mich" in text:
+        await message.channel.send("✨ *Deine Freude leuchtet heller als jede Rune.*")
+
+    # -----------------------------------------
+    # ÜBER ZWERBO
+    # -----------------------------------------
+    if any(w in text for w in [
+        "wer bist du", "erzähle von dir", "zwerbo erzähl", "zwerbo erzaehl", "zwerbo wer bist du"
+    ]):
+        antworten = [
+            "✨ *Ich bin ZwerBo, Hüter der Elemente… klein, aber erstaunlich organisiert.*",
+            "🌙 *Man nennt mich ZwerBo. Ich sortiere Chaos, beruhige Stürme und esse Kekse.*",
+            "🔥 *Ich bin ZwerBo. Halb Magie, halb Geduld, halb Humor… ja, das sind drei Hälften.*",
+            "💫 *Ich bin ein alter Runenhüter. Und trotzdem finde ich moderne Snacks faszinierend.*",
+            "🍃 *ZwerBo, zu Diensten. Ich höre den Elementen zu… und manchmal auch dir.*"
+        ]
+        await message.channel.send(random.choice(antworten))
+        return
+
+    # -----------------------------------------
+    # ALLGEMEINER NAME-TRIGGER
+    # -----------------------------------------
+    if "zwerbo" in text:
+        if not any(w in text for w in ["erzähle von dir", "wer bist du"]):
+            await message.channel.send("✨ *Ja? Ich lausche.*")
+
+    # -----------------------------------------
+    # WICHTIG: Slash-Commands weiter funktionieren lassen
+    # -----------------------------------------
     await bot.process_commands(message)
 
 # -----------------------------
