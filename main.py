@@ -2,6 +2,24 @@ import os
 import random
 import discord
 from discord.ext import commands
+from flask import Flask
+from threading import Thread
+
+# -----------------------------
+# KEEP-ALIVE SERVER (Render)
+# -----------------------------
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "ZwerBo wacht über die Elemente."
+
+def run():
+    app.run(host="0.0.0.0", port=8080)
+
+def keep_alive():
+    thread = Thread(target=run)
+    thread.start()
 
 # -----------------------------
 # DISCORD BOT BASIS
@@ -11,33 +29,36 @@ intents.message_content = True
 intents.reactions = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-
 bereits_bedankt = set()
 
 # -----------------------------
-# ON_READY – Slash-Commands syncen
+# ON_READY – Slash Commands Sync
 # -----------------------------
 @bot.event
 async def on_ready():
     print(f"ZwerBo ist online als {bot.user}")
-    await bot.tree.sync()
-    print("Slash-Commands synchronisiert.")
+
+    try:
+        synced = await bot.tree.sync()
+        print(f"Slash-Commands synchronisiert ({len(synced)} Befehle).")
+    except Exception as e:
+        print("Fehler beim Sync:", e)
 
 # -----------------------------
-# SLASH-COMMANDS – ZwerBo Persönlichkeit & Hilfe
+# SLASH COMMANDS
 # -----------------------------
-@bot.tree.command(name="weisheit", description="ZwerBo teilt eine weise, leicht humorvolle Erkenntnis.")
+@bot.tree.command(name="weisheit", description="ZwerBo teilt eine weise Erkenntnis.")
 async def weisheit(interaction: discord.Interaction):
     texte = [
         "✨ Die Stille kennt Antworten… aber manchmal flüstert sie auch Unsinn.",
         "🌙 Jeder Schatten ist nur Licht, das eine Pause macht.",
         "🔥 Mut entsteht, wenn das Herz brennt… oder wenn man scharf gegessen hat.",
-        "💧 Wie Wasser findest du deinen Weg – außer montags, da stolpern wir alle.",
+        "💧 Wie Wasser findest du deinen Weg – außer montags.",
         "🌿 Die Welt atmet… und manchmal seufzt sie auch über uns."
     ]
     await interaction.response.send_message(random.choice(texte))
 
-@bot.tree.command(name="segen", description="ZwerBo spricht einen magischen, leicht humorvollen Segen.")
+@bot.tree.command(name="segen", description="ZwerBo spricht einen magischen Segen.")
 async def segen(interaction: discord.Interaction):
     text = (
         "🌙✨ *Ein sanfter Schein legt sich um dich.*\n"
@@ -46,104 +67,107 @@ async def segen(interaction: discord.Interaction):
     )
     await interaction.response.send_message(text)
 
-@bot.tree.command(name="element", description="ZwerBo zeigt seine elementare Form – mit Stil.")
+@bot.tree.command(name="element", description="ZwerBo zeigt seine elementare Form.")
 async def element(interaction: discord.Interaction, art: str):
-    art = art.lower()
-
     formen = {
-        "feuer": "🔥 *ZwerBo lodert wie eine uralte Flamme.* Er murmelt: „Warm hier… oder liegt das an dir?“",
-        "wasser": "💧 *ZwerBo fließt ruhig wie ein Mondsee.* „Wenn ich einschlafe, weck mich nicht. Ich bin Wasser, ich darf das.“",
-        "schatten": "🌑 *ZwerBo verschmilzt mit der Nacht.* „Ich bin nicht weg… ich bin nur dramatisch.“",
-        "licht": "✨ *ZwerBo strahlt wie eine Sternrune.* „Keine Sorge, ich blend nur ein bisschen.“"
+        "feuer": "🔥 *ZwerBo lodert wie eine uralte Flamme.*",
+        "wasser": "💧 *ZwerBo fließt ruhig wie ein Mondsee.*",
+        "schatten": "🌑 *ZwerBo verschmilzt mit der Nacht.*",
+        "licht": "✨ *ZwerBo strahlt wie eine Sternrune.*"
     }
-
+    art = art.lower()
     if art in formen:
         await interaction.response.send_message(formen[art])
     else:
-        await interaction.response.send_message(
-            "Wähle eines der Elemente: `feuer`, `wasser`, `schatten`, `licht`."
-        )
+        await interaction.response.send_message("Wähle: feuer, wasser, schatten, licht.")
 
-@bot.tree.command(name="legende", description="ZwerBo erzählt von seiner ersten großen Tat.")
-async def legende(interaction: discord.Interaction):
-    text = (
-        "📜 *ZwerBo erzählt leise:* \n\n"
-        "Es war in der Nacht des Flüstersturms – ein Sturm aus Stimmen, Zweifeln und alten Ängsten.\n"
-        "Die Elemente waren verwirrt, das Feuer flackerte nervös, das Wasser verlor seinen Rhythmus.\n\n"
-        "Ich setzte mich mitten in den Sturm und sagte nur: „Eins nach dem anderen, bitte. Ich habe nur zwei Ohren.“\n"
-        "Stunde um Stunde wurden die Stimmen leiser, bis Ruhe einkehrte.\n\n"
-        "Seitdem nennen sie mich den Hüter der Stimmen…\n"
-        "aber ich sage einfach: Ich wollte nur schlafen. 🌙"
-    )
-    await interaction.response.send_message(text)
-
-# -----------------------------
-# MAGIE-SYSTEME
-# -----------------------------
-def geisttier():
-    tiere = [
-        ("🌙 Mondwolf", "ruhig, wachsam und ein bisschen dramatisch"),
-        ("🔥 Funkenfuchs", "schnell, mutig und leicht chaotisch"),
-        ("🌑 Schattenkatze", "mysteriös, elegant und schwer zu fassen"),
-        ("💧 Wassereule", "weise, ruhig und voller Tiefe"),
-        ("✨ Kristallhirsch", "rein, stolz und voller alter Magie"),
-        ("🍃 Windhase", "leichtfüßig, verspielt und frei")
-    ]
-    tier, bedeutung = random.choice(tiere)
-    return f"{tier} – {bedeutung}"
-
-@bot.tree.command(name="geisttier", description="ZwerBo enthüllt dein magisches Geisttier.")
+@bot.tree.command(name="geisttier", description="ZwerBo enthüllt dein Geisttier.")
 async def geisttier_cmd(interaction: discord.Interaction):
-    await interaction.response.send_message(
-        f"✨ *Ich lausche deiner Energie…*\nDein Geisttier ist: **{geisttier()}**"
-    )
-
-def rune():
-    runen = [
-        ("🔥 Feuerrune", "Mut, Energie und innere Stärke"),
-        ("🌙 Mondrune", "Klarheit, Ruhe und Intuition"),
-        ("🌑 Nebelrune", "Geheimnisse, Wandel und innere Tiefe"),
-        ("💧 Wasserrune", "Heilung, Fluss und Anpassung"),
-        ("✨ Lichtrune", "Hoffnung, Reinheit und Wahrheit"),
-        ("🌿 Erdrune", "Stabilität, Wachstum und Geduld")
+    tiere = [
+        "🌙 Mondwolf – ruhig und wachsam",
+        "🔥 Funkenfuchs – mutig und chaotisch",
+        "🌑 Schattenkatze – elegant und geheimnisvoll",
+        "💧 Wassereule – weise und tief",
+        "✨ Kristallhirsch – rein und stolz",
+        "🍃 Windhase – frei und verspielt"
     ]
-    r, bedeutung = random.choice(runen)
-    return f"{r} – {bedeutung}"
+    await interaction.response.send_message(f"✨ Dein Geisttier ist: **{random.choice(tiere)}**")
 
-@bot.tree.command(name="rune", description="ZwerBo erschafft eine magische Rune für dich.")
+@bot.tree.command(name="rune", description="ZwerBo erschafft eine Rune.")
 async def rune_cmd(interaction: discord.Interaction):
-    await interaction.response.send_message(
-        f"🔮 *Die Elemente formen ein Zeichen…*\nDeine Rune ist: **{rune()}**"
-    )
-
-@bot.tree.command(name="orakel", description="ZwerBo spricht eine kleine Prophezeiung.")
-async def orakel(interaction: discord.Interaction):
-    prophezeiungen = [
-        "✨ *Ein ruhiger Weg liegt vor dir… doch ein Funke könnte ihn erhellen.*",
-        "🌙 *Heute wird Klarheit kommen – vielleicht leise, vielleicht überraschend.*",
-        "🔥 *Etwas Mut wird gebraucht… aber du hast mehr davon, als du denkst.*",
-        "💧 *Lass los, was schwer ist. Das Wasser trägt dich.*",
-        "🍃 *Ein kleiner Zufall wird heute ein Lächeln bringen.*"
+    runen = [
+        "🔥 Feuerrune – Mut und Energie",
+        "🌙 Mondrune – Klarheit und Intuition",
+        "🌑 Nebelrune – Wandel und Geheimnisse",
+        "💧 Wasserrune – Heilung und Fluss",
+        "✨ Lichtrune – Hoffnung und Wahrheit",
+        "🌿 Erdrune – Stabilität und Wachstum"
     ]
-    await interaction.response.send_message(random.choice(prophezeiungen))
+    await interaction.response.send_message(f"🔮 Deine Rune ist: **{random.choice(runen)}**")
+
+@bot.tree.command(name="orakel", description="ZwerBo spricht eine Prophezeiung.")
+async def orakel(interaction: discord.Interaction):
+    texte = [
+        "✨ *Ein ruhiger Weg liegt vor dir…*",
+        "🌙 *Heute wird Klarheit kommen.*",
+        "🔥 *Etwas Mut wird gebraucht.*",
+        "💧 *Lass los, was schwer ist.*",
+        "🍃 *Ein kleiner Zufall bringt ein Lächeln.*"
+    ]
+    await interaction.response.send_message(random.choice(texte))
 
 # -----------------------------
-# HILFE-/INFO-COMMANDS
+# COMMUNITY-TRIGGER
 # -----------------------------
-# (… unverändert …)
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    text = message.content.lower()
+
+    # Begrüßungen
+    if any(w in text for w in ["hallo", "hi", "hey", "moin", "servus"]):
+        await message.channel.send("✨ *Ich grüße dich, Wanderer der Elemente.*")
+
+    if "guten morgen" in text:
+        await message.channel.send("🌅 *Ein neuer Tag erwacht…*")
+
+    if "guten abend" in text:
+        await message.channel.send("🌙 *Der Abend flüstert…*")
+
+    if "gute nacht" in text:
+        await message.channel.send("💤 *Schlafe gut.*")
+
+    await bot.process_commands(message)
 
 # -----------------------------
-# COMMUNITY-SYSTEME (on_message)
+# REACTIONS
 # -----------------------------
-# (… unverändert …)
+@bot.event
+async def on_reaction_add(reaction, user):
+    if user.bot:
+        return
+    if reaction.message.author != bot.user:
+        return
+    if reaction.message.id in bereits_bedankt:
+        return
 
-# -----------------------------
-# REACTIONS – Dank nur bei eigenen Nachrichten
-# -----------------------------
-# (… unverändert …)
+    antworten = [
+        f"✨ *Danke für das Zeichen, {user.display_name}.*",
+        f"🌙 *Ich spüre deine Energie, {user.display_name}.*",
+        f"💫 *Ein schönes Emoji.*",
+    ]
+    await reaction.message.channel.send(random.choice(antworten))
+    bereits_bedankt.add(reaction.message.id)
 
 # -----------------------------
 # START
 # -----------------------------
+keep_alive()
+
 TOKEN = os.getenv("TOKEN")
-bot.run(TOKEN)
+if TOKEN is None:
+    print("❌ FEHLER: TOKEN nicht gesetzt! Bitte in Render → Environment eintragen.")
+else:
+    bot.run(TOKEN)
