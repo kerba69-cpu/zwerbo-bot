@@ -279,35 +279,104 @@ async def on_message(message):
 
     text = message.content.lower()
 
-    # -----------------------------------------
-    # AVATAR TRIGGER – eigener Avatar
-    # -----------------------------------------
-    if "zeige mir meinen avatar" in text or "zeig mir meinen avatar" in text:
-        user = message.author
+    # Begrüßungen erweitert
+    if any(w in text for w in ["hallo", "hi", "hey", "moin", "servus"]):
+        await message.channel.send("✨ *Ich grüße dich, Wanderer der Elemente.*")
 
-        embed = discord.Embed(
-            title=f"🖼️ Dein Avatar, {user.name}",
-            description="✨ *Ein Spiegel deiner Energie…*",
-            color=0x8A2BE2
-        )
+    if "guten morgen" in text:
+        await message.channel.send("🌅 *Ein neuer Tag erwacht… und ich auch. Irgendwie.*")
 
-        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
-        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+    if "guten abend" in text:
+        await message.channel.send("🌙 *Der Abend flüstert… und ich höre zu.*")
 
-        await message.channel.send(embed=embed)
+    if "gute nacht" in text:
+        await message.channel.send("💤 *Schlafe gut. Ich halte Wache… meistens.*")
+
+    # Snacks erweitert
+    snacks = {
+        "kaffee": "☕ *Ein Schluck Wärme für deine Seele.*",
+        "kakao": "🍫 *Süß, warm und perfekt für ruhige Momente.*",
+        "schokolade": "🍫 *Schokolade… die beste Art, Magie zu essen.*",
+        "chips": "🍟 *Knuspern ist eine Form der Meditation.*",
+        "kuchen": "🍰 *Kuchen ist Liebe in Scheiben.*",
+        "tee": "🍵 *Tee beruhigt… außer man verschüttet ihn.*",
+        "pizza": "🍕 *Pizza… die wahre Form der Magie.*",
+        "bier": "🍺 *Möge es kalt sein und deine Sorgen warm vertreiben.*"
+    }
+
+    for wort, antwort in snacks.items():
+        if wort in text:
+            await message.channel.send(antwort)
+
+    # Stimmungs-Trigger
+    if "müde" in text:
+        await message.channel.send("😴 *Ich spüre deine Müdigkeit… ruh dich kurz aus.*")
+
+    if "langweilig" in text:
+        await message.channel.send("🍃 *Langeweile ist nur ein schlafendes Abenteuer.*")
+
+    if "traurig" in text:
+        await message.channel.send("💙 *Ich sende dir ein wenig Licht. Du bist nicht allein.*")
+
+    if "gestresst" in text:
+        await message.channel.send("💧 *Atme tief. Die Elemente stehen hinter dir.*")
+
+    if "freue mich" in text:
+        await message.channel.send("✨ *Deine Freude leuchtet heller als jede Rune.*")
+
+    # ZwerBo erzählt von sich
+    if any(w in text for w in [
+        "wer bist du", "erzähle von dir", "zwerbo erzähl", "zwerbo erzaehl", "zwerbo wer bist du"
+    ]):
+        antworten = [
+            "✨ *Ich bin ZwerBo, Hüter der Elemente… klein, aber erstaunlich organisiert.*",
+            "🌙 *Man nennt mich ZwerBo. Ich sortiere Chaos, beruhige Stürme und esse Kekse.*",
+            "🔥 *Ich bin ZwerBo. Halb Magie, halb Geduld, halb Humor… ja, das sind drei Hälften.*",
+            "💫 *Ich bin ein alter Runenhüter. Und trotzdem finde ich moderne Snacks faszinierend.*",
+            "🍃 *ZwerBo, zu Diensten. Ich höre den Elementen zu… und manchmal auch dir.*"
+        ]
+        await message.channel.send(random.choice(antworten))
+
+    # Allgemeiner Name-Trigger
+    if "zwerbo" in text:
+        # nur reagieren, wenn nicht schon oben durch „zwerbo erzähl“ etc. abgefangen
+        if not any(w in text for w in ["erzähle von dir", "erzaehl von dir", "wer bist du"]):
+            await message.channel.send("✨ *Ja? Ich lausche.*")
+
+    await bot.process_commands(message)
+
+# -----------------------------
+# REACTIONS – Dank nur bei eigenen Nachrichten
+# -----------------------------
+@bot.event
+async def on_reaction_add(reaction, user):
+    if user == bot.user:
         return
 
-    # -----------------------------------------
-    # AVATAR TRIGGER – anderer User (zeige mir user avatar @Name)
-    # -----------------------------------------
-    if ("zeige mir user avatar" in text or "zeig mir user avatar" in text) and message.mentions:
-        user = message.mentions[0]
+    if reaction.message.author != bot.user:
+        return
 
-        embed = discord.Embed(
-            title=f"🖼️ Avatar von {user.name}",
-            description="✨ *Ein Bild voller Persönlichkeit…*",
-            color=0x8A2BE2
-        )
+    nachricht_id = reaction.message.id
 
-        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
-        embed.set_footer
+    if nachricht_id in bereits_bedankt:
+        return
+
+    emoji = reaction.emoji
+
+    antworten = [
+        f"✨ *Danke für das Zeichen, {user.display_name}.*",
+        f"🌙 *Ich spüre deine Energie, {user.display_name}. Schön, dass du hier bist.*",
+        f"💫 *Ein {emoji}? Eine feine Wahl.*",
+        f"🔥 *Deine Reaktion wärmt mein kleines Elementenherz.*",
+        f"🍃 *Danke, {user.display_name}. Selbst kleine Gesten tragen Magie.*"
+    ]
+
+    await reaction.message.channel.send(random.choice(antworten))
+    bereits_bedankt.add(nachricht_id)
+
+# -----------------------------
+# START
+# -----------------------------
+keep_alive()
+TOKEN = os.getenv("TOKEN")
+bot.run(TOKEN)
