@@ -278,6 +278,133 @@ async def on_message(message):
         return
 
     text = message.content.lower()
+    # -----------------------------------------
+    # AVATAR TRIGGER – eigener Avatar
+    # -----------------------------------------
+    if "zeige mir meinen avatar" in text or "zeig mir meinen avatar" in text:
+        user = message.author
+
+        embed = discord.Embed(
+            title=f"🖼️ Dein Avatar, {user.name}",
+            description="✨ *Ein Spiegel deiner Energie…*",
+            color=0x8A2BE2
+        )
+
+        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # AVATAR TRIGGER – anderer User (zeige mir user avatar @Name)
+    # -----------------------------------------
+    if ("zeige mir user avatar" in text or "zeig mir user avatar" in text) and message.mentions:
+        user = message.mentions[0]
+
+        embed = discord.Embed(
+            title=f"🖼️ Avatar von {user.name}",
+            description="✨ *Ein Bild voller Persönlichkeit…*",
+            color=0x8A2BE2
+        )
+
+        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # AVATAR TRIGGER – avatar von @Name
+    # -----------------------------------------
+    if "avatar von" in text and message.mentions:
+        user = message.mentions[0]
+
+        embed = discord.Embed(
+            title=f"🖼️ Avatar von {user.name}",
+            description="✨ *Ein Bild sagt mehr als tausend Runen…*",
+            color=0x8A2BE2
+        )
+
+        embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # BANNER TRIGGER – eigenes Banner
+    # -----------------------------------------
+    if "zeige mir mein banner" in text or "zeig mir mein banner" in text:
+        user = await bot.fetch_user(message.author.id)
+
+        embed = discord.Embed(
+            title=f"🎴 Dein Banner, {user.name}",
+            description="✨ *Ein Hauch deiner inneren Farben…*",
+            color=0x8A2BE2
+        )
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+        else:
+            embed.add_field(
+                name="Kein Banner gefunden",
+                value="🌙 *Du hast kein Banner gesetzt.*"
+            )
+
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # BANNER TRIGGER – anderer User (zeige mir user banner @Name)
+    # -----------------------------------------
+    if ("zeige mir user banner" in text or "zeig mir user banner" in text) and message.mentions:
+        target = message.mentions[0]
+        user = await bot.fetch_user(target.id)
+
+        embed = discord.Embed(
+            title=f"🎴 Banner von {user.name}",
+            description="✨ *Die Farben dieses Wanderers…*",
+            color=0x8A2BE2
+        )
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+        else:
+            embed.add_field(
+                name="Kein Banner gefunden",
+                value="🌙 *Dieser User hat kein Banner gesetzt.*"
+            )
+
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+        await message.channel.send(embed=embed)
+        return
+
+    # -----------------------------------------
+    # BANNER TRIGGER – banner von @Name
+    # -----------------------------------------
+    if "banner von" in text and message.mentions:
+        target = message.mentions[0]
+        user = await bot.fetch_user(target.id)
+
+        embed = discord.Embed(
+            title=f"🎴 Banner von {user.name}",
+            description="✨ *Ein Blick in die Farben ihrer Seele…*",
+            color=0x8A2BE2
+        )
+
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+        else:
+            embed.add_field(
+                name="Kein Banner gefunden",
+                value="🌙 *Dieser User hat kein Banner gesetzt.*"
+            )
+
+        embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+        await message.channel.send(embed=embed)
+        return
 
     # Begrüßungen erweitert
     if any(w in text for w in ["hallo", "hi", "hey", "moin", "servus"]):
