@@ -94,6 +94,22 @@ async def legende(interaction: discord.Interaction):
         "aber ich sage einfach: Ich wollte nur schlafen. 🌙"
     )
     await interaction.response.send_message(text)
+@bot.tree.command(name="avatar", description="Zeigt den Avatar eines Benutzers in groß an.")
+async def avatar(interaction: discord.Interaction, user: discord.User = None):
+    if user is None:
+        user = interaction.user
+
+    embed = discord.Embed(
+        title=f"🖼️ Avatar von {user.name}",
+        description="✨ *Ein Bild sagt mehr als tausend Runen…*",
+        color=0x8A2BE2
+    )
+
+    embed.set_image(url=user.avatar.url if user.avatar else user.default_avatar.url)
+
+    embed.set_footer(text="🌙 ZwerBo – Hüter der Elemente")
+
+    await interaction.response.send_message(embed=embed)
 
 # -----------------------------
 # MAGIE-SYSTEME (Geisttier, Rune, Orakel)
