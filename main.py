@@ -3,9 +3,6 @@ keep_alive()
 
 # ============================================
 # ZWERBO – Ultimate Edition
-
-# ============================================
-# ZWERBO – Ultimate Edition
 # Version: 3.0.0 – Ausgewogen Plus
 # ============================================
 
@@ -23,8 +20,21 @@ ZWERBO_VERSION = "3.0.0 – Ultimate Edition"
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
+intents.guilds = True
+intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# ============================================
+# ON_READY – Slash-Commands syncen
+# ============================================
+
+@bot.event
+async def on_ready():
+    await bot.tree.sync()
+    print(f"✨ ZwerBo {ZWERBO_VERSION} ist online als {bot.user}!")
+    print("🔧 Slash-Commands synchronisiert!")
+    print("🌟 ZwerBo ist bereit!")
 
 # ============================================
 # PERSÖNLICHKEITSMODUL – Ausgewogen Plus
@@ -53,7 +63,7 @@ ZWERBO_STYLE = {
     ]
 }
 
-def zwerbo_tonfall(kategorie):
+def zwerbo_tonfall(kategorie: str) -> str:
     return random.choice(ZWERBO_STYLE.get(kategorie, ["✨"]))
 
 # ============================================
@@ -90,7 +100,7 @@ TRIGGER = {
     }
 }
 
-def finde_trigger(text):
+def finde_trigger(text: str):
     text = text.lower()
     for key, daten in TRIGGER.items():
         if key in text:
@@ -113,7 +123,7 @@ RUNEN = {
     "ᚨ Ansuz": "Weisheit, Klarheit, Führung."
 }
 
-def zufalls_element():
+def zufalls_element() -> str:
     return random.choice(ELEMENTE)
 
 def zufalls_rune():
@@ -130,21 +140,35 @@ async def version(interaction: discord.Interaction):
 @bot.tree.command(name="element", description="Zieht ein zufälliges Element.")
 async def element(interaction: discord.Interaction):
     elem = zufalls_element()
-    await interaction.response.send_message(f"{zwerbo_tonfall('mystisch')} Dein Element lautet: **{elem}**")
+    await interaction.response.send_message(
+        f"{zwerbo_tonfall('mystisch')} Dein Element lautet: **{elem}**"
+    )
 
 @bot.tree.command(name="rune", description="Zieht eine magische Runenkarte.")
 async def rune(interaction: discord.Interaction):
-    rune, bedeutung = zufalls_rune()
+    rune_symbol, bedeutung = zufalls_rune()
     await interaction.response.send_message(
-        f"{zwerbo_tonfall('mystisch')} Deine Rune ist **{rune}**\n➡️ *{bedeutung}*"
+        f"{zwerbo_tonfall('mystisch')} Deine Rune ist **{rune_symbol}**\n➡️ *{bedeutung}*"
     )
 
 # ============================================
-# ON_MESSAGE – Herzstück
+# PREFIX-COMMANDS (optional, aber praktisch)
+# ============================================
+
+@bot.command()
+async def ping(ctx: commands.Context):
+    await ctx.send("Pong! 🏓")
+
+@bot.command()
+async def zwerbo(ctx: commands.Context):
+    await ctx.send("Ich bin ZwerBo 3.0.0 – bereit für Action! 🤖🔥")
+
+# ============================================
+# ON_MESSAGE – Herzstück für Trigger
 # ============================================
 
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
@@ -158,6 +182,7 @@ async def on_message(message):
         prefix = zwerbo_tonfall(stil)
         await message.channel.send(f"{prefix} {antwort}")
 
+    # WICHTIG: Commands trotzdem verarbeiten
     await bot.process_commands(message)
 
 # ============================================
@@ -167,7 +192,7 @@ async def on_message(message):
 TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
-    print("❌ Kein Token gefunden! Bitte in Render → Environment Variables setzen.")
+    print("❌ Kein Token gefunden! Bitte in Render → Environment Variables setzen (KEY: TOKEN).")
 else:
     print(f"✨ ZwerBo {ZWERBO_VERSION} erwacht…")
     bot.run(TOKEN)
