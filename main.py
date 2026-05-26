@@ -1,3 +1,9 @@
+from keep_alive import keep_alive
+keep_alive()
+
+# ============================================
+# ZWERBO – Ultimate Edition
+
 # ============================================
 # ZWERBO – Ultimate Edition
 # Version: 3.0.0 – Ausgewogen Plus
