@@ -184,6 +184,27 @@ async def on_message(message: discord.Message):
 
     # WICHTIG: Commands trotzdem verarbeiten
     await bot.process_commands(message)
+@bot.event
+async def on_reaction_add(reaction, user):
+    if user.bot:
+        return
+
+    # Nur reagieren, wenn die Reaktion auf eine ZwerBo-Nachricht geht
+    if reaction.message.author != bot.user:
+        return
+
+    positive = ["❤️", "💛", "✨", "🌟", "👍", "💖", "🔥"]
+
+    if reaction.emoji in positive:
+        antworten = [
+            "✨ Danke für die Energie!",
+            "🌟 Deine Reaktion lässt mich heller leuchten.",
+            "💛 Das bedeutet mir viel.",
+            "🔥 Ich spüre deine Unterstützung!",
+            "💫 Danke, Reisende."
+        ]
+        await reaction.message.channel.send(random.choice(antworten))
+
 
 # ============================================
 # START
