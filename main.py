@@ -184,6 +184,15 @@ async def on_message(message: discord.Message):
 
     # WICHTIG: Commands trotzdem verarbeiten
     await bot.process_commands(message)
+
+
+# ============================================
+# REAKTIONS-DANKES-MODUL MIT COOLDOWN
+# ============================================
+
+# Cooldown-Speicher
+letzter_dank = {}
+
 @bot.event
 async def on_reaction_add(reaction, user):
     if user.bot:
@@ -193,22 +202,37 @@ async def on_reaction_add(reaction, user):
     if reaction.message.author != bot.user:
         return
 
+    # Positive Reaktionen
     positive = ["❤️", "💛", "✨", "🌟", "👍", "💖", "🔥"]
 
-    if reaction.emoji in positive:
-        antworten = [
-            "✨ Danke für die Energie!",
-            "🌟 Deine Reaktion lässt mich heller leuchten.",
-            "💛 Das bedeutet mir viel.",
-            "🔥 Ich spüre deine Unterstützung!",
-            "💫 Danke, Reisende."
-        ]
-        await reaction.message.channel.send(random.choice(antworten))
+    if reaction.emoji not in positive:
+        return
+
+    # Cooldown prüfen (5 Sekunden Beispiel)
+    user_id = user.id
+    jetzt = discord.utils.utcnow().timestamp()
+
+    if user_id in letzter_dank:
+        if jetzt - letzter_dank[user_id] < 5:
+            return  # Cooldown aktiv → keine Antwort
+
+    letzter_dank[user_id] = jetzt  # Cooldown setzen
+
+    antworten = [
+        "✨ Danke für die Energie!",
+        "🌟 Deine Reaktion lässt mich heller leuchten.",
+        "💛 Das bedeutet mir viel.",
+        "🔥 Ich spüre deine Unterstützung!",
+        "💫 Danke, Reisende."
+    ]
+
+    await reaction.message.channel.send(random.choice(antworten))
 
 
 # ============================================
 # START
 # ============================================
+
 
 TOKEN = os.getenv("TOKEN")
 
