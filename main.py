@@ -170,4 +170,150 @@ ELEMENTE = ["🔥 Feuer", "💧 Wasser", "🌿 Erde", "🌪️ Luft", "⚡ Blitz
 
 RUNEN = {
     "ᚠ Fehu": "Wohlstand, Neubeginn, Energiefluss.",
-    "ᚢ Uruz": "Kraft, Mut, innere
+    "ᚢ Uruz": "Kraft, Mut, innere Stärke.",
+    "ᚦ Thurisaz": "Schutz, Entscheidung, Wandel.",
+    "ᚨ Ansuz": "Weisheit, Klarheit, Führung."
+}
+
+def zufalls_element():
+    return random.choice(ELEMENTE)
+
+def zufalls_rune():
+    return random.choice(list(RUNEN.items()))
+
+# ============================================
+# SLASH COMMANDS
+# ============================================
+
+@bot.tree.command(name="version", description="Zeigt die aktuelle ZwerBo-Version.")
+async def version(interaction):
+    await interaction.response.send_message(f"✨ **ZwerBo Version:** {ZWERBO_VERSION}")
+
+@bot.tree.command(name="element", description="Zieht ein zufälliges Element.")
+async def element(interaction):
+    elem = zufalls_element()
+    await interaction.response.send_message(f"{zwerbo_tonfall('mystisch')} Dein Element lautet: **{elem}**")
+
+@bot.tree.command(name="rune", description="Zieht eine magische Runenkarte.")
+async def rune(interaction):
+    rune_symbol, bedeutung = zufalls_rune()
+    await interaction.response.send_message(
+        f"{zwerbo_tonfall('mystisch')} Deine Rune ist **{rune_symbol}**\n➡️ *{bedeutung}*"
+    )
+
+@bot.tree.command(name="status", description="Zeigt den aktuellen ZwerBo-Status.")
+async def status_cmd(interaction):
+    await interaction.response.send_message(f"✨ **ZwerBo Status:** {zwerbo_status}")
+
+@bot.tree.command(name="status_set", description="Setzt den ZwerBo-Status.")
+async def status_set(interaction, neuer_status: str):
+    global zwerbo_status
+    zwerbo_status = neuer_status
+    await update_discord_status()
+    await interaction.response.send_message(f"🌟 Neuer Status: **{neuer_status}**")
+
+# ============================================
+# PREFIX COMMANDS (aus 3.0.0)
+# ============================================
+
+@bot.command()
+async def ping(ctx):
+    await ctx.send("Pong! 🏓")
+
+@bot.command()
+async def zwerbo(ctx):
+    await ctx.send("Ich bin ZwerBo – bereit für Action! 🤖🔥")
+
+# ============================================
+# REAKTIONS-DANKES-MODUL (aus 3.0.0)
+# ============================================
+
+letzter_dank = {}
+
+@bot.event
+async def on_reaction_add(reaction, user):
+    if user.bot:
+        return
+
+    if reaction.message.author != bot.user:
+        return
+
+    positive = ["❤️", "💛", "✨", "🌟", "👍", "💖", "🔥"]
+
+    if reaction.emoji not in positive:
+        return
+
+    user_id = user.id
+    jetzt = discord.utils.utcnow().timestamp()
+
+    if user_id in letzter_dank:
+        if jetzt - letzter_dank[user_id] < 5:
+            return
+
+    letzter_dank[user_id] = jetzt
+
+    antworten = [
+        "✨ Danke für die Energie!",
+        "🌟 Deine Reaktion lässt mich heller leuchten.",
+        "💛 Das bedeutet mir viel.",
+        "🔥 Ich spüre deine Unterstützung!",
+        "💫 Danke, Reisende."
+    ]
+
+    await reaction.message.channel.send(random.choice(antworten))
+
+# ============================================
+# ON_READY
+# ============================================
+
+@bot.event
+async def on_ready():
+    await bot.tree.sync()
+    schlaf_check.start()
+    await update_discord_status()
+    print(f"✨ ZwerBo {ZWERBO_VERSION} ist online!")
+
+# ============================================
+# ON_MESSAGE – Trigger + Auto-Emoji + Schlafmodus
+# ============================================
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    global zwerbo_status
+    text = message.content.lower()
+
+    # Auto-Emoji
+    auto = finde_autoemoji(text)
+    if auto:
+        emoji, ton = auto
+        if zwerbo_status == "schläft":
+            ton = "…mmh…"
+        await message.channel.send(f"{emoji} *{ton}*")
+
+    # Trigger
+    trigger = finde_trigger(text)
+    if trigger:
+        daten = TRIGGER[trigger]
+        stil = daten["stil"]
+        antwort = random.choice(daten["antworten"])
+
+        if zwerbo_status == "schläft":
+            stil = "schlaf"
+
+        prefix = zwerbo_tonfall(stil)
+        await message.channel.send(f"{prefix} {antwort}")
+
+    await bot.process_commands(message)
+
+# ============================================
+# START
+# ============================================
+
+TOKEN = os.getenv("TOKEN")
+if not TOKEN:
+    print("❌ Kein Token gefunden!")
+else:
+    bot.run(TOKEN)
