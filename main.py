@@ -47,7 +47,7 @@ async def on_ready():
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
-         model="llama3-70b-instant",
+        model="llama3-8b-instant",
 
             messages=[{"role": "user", "content": prompt}]
         )
