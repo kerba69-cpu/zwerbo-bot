@@ -12,7 +12,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "ZwerBo is alive!"
+    return "ZwerBo ist wach und voller Magie!"
 
 def run():
     app.run(host='0.0.0.0', port=10000)
@@ -35,20 +35,25 @@ client = commands.Bot(command_prefix="!", intents=intents)
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # -----------------------------
-# EVENT: BOT STARTET
-# -----------------------------
-@client.event
-async def on_ready():
-    print(f"ZwerBo ist online als {client.user}!")
-
-# -----------------------------
-# AI-FUNKTION
+# AI-FUNKTION (Deutsch + ZwerBo-Stil)
 # -----------------------------
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du bist ZwerBo, ein kleiner magischer Kobold-Bot. "
+                        "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
+                        "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
+                        "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
+                        "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
+                    )
+                },
+                {"role": "user", "content": prompt}
+            ]
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -74,7 +79,7 @@ async def on_message(message):
 
     # Trigger
     if any(trigger in msg for trigger in TRIGGER_WORDS):
-        await message.channel.send("Hallo! Ich bin ZwerBo – wie kann ich helfen?")
+        await message.channel.send("Huhu! ✨ Ich bin da – was brauchst du?")
         return
 
     # AI
