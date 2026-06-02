@@ -6,7 +6,7 @@ from flask import Flask
 import threading
 
 # -----------------------------
-# KEEP-ALIVE WEB SERVER (Render Workaround)
+# KEEP-ALIVE WEB SERVER (Render)
 # -----------------------------
 app = Flask('')
 
@@ -39,19 +39,15 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # -----------------------------
 @client.event
 async def on_ready():
-    print(f"ZwerBo 4.0.0 ist online als {client.user}!")
+    print(f"ZwerBo ist online als {client.user}!")
 
 # -----------------------------
-# AI-ANTWORT FUNKTION
+# AI-FUNKTION
 # -----------------------------
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
-        model="llama3-8b",
-
-
-
-
+            model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content
@@ -59,7 +55,7 @@ def ask_groq(prompt):
         return f"Fehler bei Groq: {e}"
 
 # -----------------------------
-# TRIGGER / KEYWORDS
+# TRIGGER
 # -----------------------------
 TRIGGER_WORDS = [
     "hallo zwerbo", "hi zwerbo", "hey zwerbo",
@@ -76,12 +72,12 @@ async def on_message(message):
 
     msg = message.content.lower()
 
-    # Trigger-Wörter
+    # Trigger
     if any(trigger in msg for trigger in TRIGGER_WORDS):
         await message.channel.send("Hallo! Ich bin ZwerBo – wie kann ich helfen?")
         return
 
-    # AI-Antwort
+    # AI
     if msg.startswith("!ai "):
         prompt = msg.replace("!ai ", "")
         answer = ask_groq(prompt)
@@ -91,23 +87,17 @@ async def on_message(message):
     await client.process_commands(message)
 
 # -----------------------------
-# BEFEHL: PING
+# BEFEHLE
 # -----------------------------
 @client.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# -----------------------------
-# BEFEHL: JOKE
-# -----------------------------
 @client.command()
 async def joke(ctx):
     joke = ask_groq("Erzähl einen kurzen lustigen Witz.")
     await ctx.send(joke)
 
-# -----------------------------
-# BEFEHL: QUOTE
-# -----------------------------
 @client.command()
 async def quote(ctx):
     quote = ask_groq("Gib mir ein kurzes inspirierendes Zitat.")
@@ -116,5 +106,5 @@ async def quote(ctx):
 # -----------------------------
 # START
 # -----------------------------
-keep_alive()  # Wichtig für Render!
+keep_alive()
 client.run(TOKEN)
