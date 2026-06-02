@@ -47,7 +47,8 @@ async def on_ready():
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
-        model="mixtral-8x7b-32768",
+        model="llama3-8b-versatile",
+
 
 
             messages=[{"role": "user", "content": prompt}]
