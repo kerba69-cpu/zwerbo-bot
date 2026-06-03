@@ -4,6 +4,7 @@ from discord.ext import commands
 from groq import Groq
 from flask import Flask
 import threading
+import random
 
 # -----------------------------
 # KEEP-ALIVE WEB SERVER (Render)
@@ -29,6 +30,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.reactions = True
 
 client = commands.Bot(command_prefix="!", intents=intents)
 
@@ -60,15 +62,29 @@ def ask_groq(prompt):
         return f"Fehler bei Groq: {e}"
 
 # -----------------------------
-# TRIGGER
+# TRIGGER-WÖRTER
 # -----------------------------
-TRIGGER_WORDS = [
-    "hallo zwerbo", "hi zwerbo", "hey zwerbo",
-    "zwerbo?", "zwerbo!", "zwerbo"
-]
+TRIGGER_WORDS = ["hallo", "hi", "hey", "zwerbo"]
+
+MORNING = ["guten morgen", "morgen", "moin"]
+DAY = ["guten tag"]
+EVENING = ["guten abend", "abend"]
+
+AUTO_EMOJIS = ["✨", "😊", "🌙", "🔥", "🍃"]
 
 # -----------------------------
-# EVENT: NACHRICHTEN
+# REAKTIONEN
+# -----------------------------
+@client.event
+async def on_reaction_add(reaction, user):
+    if user.bot:
+        return
+
+    if reaction.message.author == client.user:
+        await reaction.message.channel.send("Oh! Danke für das kleine Funkeln ✨")
+
+# -----------------------------
+# NACHRICHTEN-EVENT
 # -----------------------------
 @client.event
 async def on_message(message):
@@ -77,17 +93,37 @@ async def on_message(message):
 
     msg = message.content.lower()
 
+    # Auto-Emoji (einmal pro Nachricht)
+    if random.random() < 0.25:
+        try:
+            await message.add_reaction(random.choice(AUTO_EMOJIS))
+        except:
+            pass
+
+    # Tageszeiten
+    if any(word in msg for word in MORNING):
+        await message.channel.send("Einen zauberhaften guten Morgen! ✨🌅")
+        return
+
+    if any(word in msg for word in DAY):
+        await message.channel.send("Einen wundervollen guten Tag wünsche ich dir! ☀️")
+        return
+
+    if any(word in msg for word in EVENING):
+        await message.channel.send("Einen gemütlichen guten Abend wünsche ich dir! 🌙✨")
+        return
+
     # Trigger
     if any(trigger in msg for trigger in TRIGGER_WORDS):
         await message.channel.send("Huhu! ✨ Ich bin da – was brauchst du?")
         return
 
-    # AI
-    if msg.startswith("!ai "):
-        prompt = msg.replace("!ai ", "")
-        answer = ask_groq(prompt)
-        await message.channel.send(answer)
-        return
+    # AI ohne Prefix (!ai)
+    if not msg.startswith("!"):
+        if len(msg) > 2:  # verhindert Spam durch einzelne Buchstaben
+            answer = ask_groq(msg)
+            await message.channel.send(answer)
+            return
 
     await client.process_commands(message)
 
@@ -99,14 +135,9 @@ async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
 @client.command()
-async def joke(ctx):
-    joke = ask_groq("Erzähl einen kurzen lustigen Witz.")
-    await ctx.send(joke)
-
-@client.command()
-async def quote(ctx):
-    quote = ask_groq("Gib mir ein kurzes inspirierendes Zitat.")
-    await ctx.send(quote)
+async def ai(ctx, *, prompt: str):
+    answer = ask_groq(prompt)
+    await ctx.send(answer)
 
 # -----------------------------
 # START
