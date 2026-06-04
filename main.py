@@ -48,9 +48,9 @@ def ask_groq(prompt):
                     "role": "system",
                     "content": (
                         "Du bist ZwerBo, ein kleiner magischer Kobold-Bot. "
-                        "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
+                        "Du antwortest IMMER auf Deutsch. "
                         "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
-                        "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
+                        "Du redest wie ein kleiner Waldgeist, neugierig und hilfsbereit. "
                         "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
                     )
                 },
@@ -65,12 +65,7 @@ def ask_groq(prompt):
 # TRIGGER-WÖRTER
 # -----------------------------
 TRIGGER_WORDS = ["hallo zwerbo", "hi zwerbo", "hey zwerbo"]
-
 STORY_WORDS = ["erzähle", "erzähl", "geschichte", "sag was", "story", "märchen"]
-
-MORNING = ["guten morgen"]
-DAY = ["guten tag"]
-EVENING = ["guten abend"]
 
 AUTO_EMOJIS = ["✨", "😊", "🌙", "🔥", "🍃"]
 
@@ -96,14 +91,27 @@ async def on_message(message):
     msg = message.content.lower()
 
     # -----------------------------
+    # TAGESZEITEN-TRIGGER (immer aktiv)
+    # -----------------------------
+    if any(word in msg for word in ["guten morgen", "morgen", "moin"]):
+        await message.channel.send(f"Guten Morgen, @{message.author.display_name} ✨🌅")
+        return
+
+    if any(word in msg for word in ["guten tag", "tagchen", "tach"]):
+        await message.channel.send(f"Einen wundervollen Tag dir, @{message.author.display_name} ✨🌤️")
+        return
+
+    if any(word in msg for word in ["guten abend", "abend", "nabend"]):
+        await message.channel.send(f"Einen entspannten Abend wünsche ich dir, @{message.author.display_name} 🌙✨")
+        return
+
+    if any(word in msg for word in ["gute nacht", "nacht", "gn"]):
+        await message.channel.send(f"Schlaf gut, @{message.author.display_name} ✨🌌 Die Sterne wachen über dich.")
+        return
+
+    # -----------------------------
     # ANTI-DAZWISCHENREDEN-SPERRE
     # -----------------------------
-    # ZwerBo reagiert nur, wenn:
-    # - @ZwerBo erwähnt wird
-    # - "zwerbo" am Satzanfang steht
-    # - ein Trigger exakt passt
-    # - eine Erzähl-Anfrage + Name vorkommt
-
     mentioned = client.user in message.mentions
     starts_with_name = msg.startswith("zwerbo")
     direct_trigger = any(msg.startswith(t) for t in TRIGGER_WORDS)
@@ -115,7 +123,6 @@ async def on_message(message):
 
     direct_call = mentioned or starts_with_name or direct_trigger or story_request
 
-    # Wenn keine direkte Ansprache → still bleiben
     if not direct_call:
         await client.process_commands(message)
         return
@@ -126,19 +133,6 @@ async def on_message(message):
             await message.add_reaction(random.choice(AUTO_EMOJIS))
         except:
             pass
-
-    # Tageszeiten
-    if any(word in msg for word in MORNING):
-        await message.channel.send("Einen zauberhaften guten Morgen! ✨🌅")
-        return
-
-    if any(word in msg for word in DAY):
-        await message.channel.send("Einen wundervollen guten Tag wünsche ich dir! ☀️")
-        return
-
-    if any(word in msg for word in EVENING):
-        await message.channel.send("Einen gemütlichen guten Abend wünsche ich dir! 🌙✨")
-        return
 
     # Erzähl-Anfrage → KI
     if story_request:
