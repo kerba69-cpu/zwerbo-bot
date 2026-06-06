@@ -91,7 +91,14 @@ async def on_message(message):
     msg = message.content.lower()
 
     # -----------------------------
-    # TAGESZEITEN-TRIGGER (immer aktiv)
+    # UNIVERSAL-HALLO-TRIGGER
+    # -----------------------------
+    if any(word in msg for word in ["hallo", "hi", "hey"]):
+        await message.channel.send(f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!")
+        return
+
+    # -----------------------------
+    # TAGESZEITEN-TRIGGER
     # -----------------------------
     if any(word in msg for word in ["guten morgen", "morgen", "moin"]):
         await message.channel.send(f"Guten Morgen, @{message.author.display_name} ✨🌅")
