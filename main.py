@@ -42,7 +42,7 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
-            model="llama-3.1-70b-versatile",  # aktuelles, stabiles Ersatzmodell
+            model="llama3-groq-8b-tool-use-preview",
             messages=[
                 {
                     "role": "system",
