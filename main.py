@@ -42,15 +42,15 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 def ask_groq(prompt):
     try:
         response = groq_client.chat.completions.create(
-            model="llama3-groq-8b-tool-use-preview",
+            model="llama-3.1-8b-instant",
             messages=[
                 {
                     "role": "system",
                     "content": (
                         "Du bist ZwerBo, ein kleiner magischer Kobold-Bot. "
-                        "Du antwortest IMMER auf Deutsch. "
+                        "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
                         "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
-                        "Du redest wie ein kleiner Waldgeist, neugierig und hilfsbereit. "
+                        "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
                         "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
                     )
                 },
@@ -60,8 +60,6 @@ def ask_groq(prompt):
         return response.choices[0].message.content
     except Exception as e:
         return f'Fehler bei Groq: {e}'
-
-
 
 
 # -----------------------------
