@@ -1,10 +1,10 @@
 import os
 import discord
 from discord.ext import commands
-from groq import Groq
 from flask import Flask
 import threading
 import random
+import requests
 
 # -----------------------------
 # KEEP-ALIVE WEB SERVER (Render)
@@ -26,7 +26,7 @@ def keep_alive():
 # DISCORD BOT SETUP
 # -----------------------------
 TOKEN = os.getenv("TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+DEEPINFRA_API_KEY = os.getenv("DEEPINFRA_API_KEY")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -34,33 +34,38 @@ intents.reactions = True
 
 client = commands.Bot(command_prefix="!", intents=intents)
 
-groq_client = Groq(api_key=GROQ_API_KEY)
-
 # -----------------------------
 # AI-FUNKTION (Deutsch + ZwerBo-Stil)
 # -----------------------------
-def ask_groq(prompt):
-    try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Du bist ZwerBo, ein kleiner magischer Kobold-Bot. "
-                        "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
-                        "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
-                        "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
-                        "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
-                    )
-                },
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f'Fehler bei Groq: {e}'
+ZWERBO_SYSTEM = (
+    "Du bist ZwerBo, ein kleiner magischer Kobold-Bot. "
+    "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
+    "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
+    "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
+    "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
+)
 
+MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+
+def ask_deepinfra(prompt):
+    url = f"https://api.deepinfra.com/v1/inference/{MODEL}"
+    headers = {
+        "Authorization": f"Bearer {DEEPINFRA_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "input": prompt,
+        "system_prompt": ZWERBO_SYSTEM,
+        "max_new_tokens": 300,
+        "temperature": 0.7
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        result = response.json()
+        return result["results"][0]["generated_text"]
+    except Exception as e:
+        return f"Fehler bei DeepInfra: {e}"
 
 # -----------------------------
 # TRIGGER-WÖRTER
@@ -91,16 +96,12 @@ async def on_message(message):
 
     msg = message.content.lower()
 
-    # -----------------------------
     # UNIVERSAL-HALLO-TRIGGER
-    # -----------------------------
     if any(word in msg for word in ["hallo", "hi", "hey"]):
         await message.channel.send(f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!")
         return
 
-    # -----------------------------
     # TAGESZEITEN-TRIGGER
-    # -----------------------------
     if any(word in msg for word in ["guten morgen", "morgen", "moin"]):
         await message.channel.send(f"Guten Morgen, @{message.author.display_name} ✨🌅")
         return
@@ -117,9 +118,7 @@ async def on_message(message):
         await message.channel.send(f"Schlaf gut, @{message.author.display_name} ✨🌌 Die Sterne wachen über dich.")
         return
 
-    # -----------------------------
     # ANTI-DAZWISCHENREDEN-SPERRE
-    # -----------------------------
     mentioned = client.user in message.mentions
     starts_with_name = msg.startswith("zwerbo")
     direct_trigger = any(msg.startswith(t) for t in TRIGGER_WORDS)
@@ -144,7 +143,7 @@ async def on_message(message):
 
     # Erzähl-Anfrage → KI
     if story_request:
-        answer = ask_groq(msg)
+        answer = ask_deepinfra(msg)
         await message.channel.send(answer)
         return
 
@@ -155,7 +154,7 @@ async def on_message(message):
 
     # KI bei direkter Ansprache
     if mentioned:
-        answer = ask_groq(msg)
+        answer = ask_deepinfra(msg)
         await message.channel.send(answer)
         return
 
@@ -170,7 +169,7 @@ async def ping(ctx):
 
 @client.command()
 async def ai(ctx, *, prompt: str):
-    answer = ask_groq(prompt)
+    answer = ask_deepinfra(prompt)
     await ctx.send(answer)
 
 # -----------------------------
