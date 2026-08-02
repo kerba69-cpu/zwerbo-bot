@@ -1,4 +1,4 @@
-from flask import Flask
+1from flask import Flask
 from threading import Thread
 
 app = Flask('')
@@ -8,7 +8,7 @@ def home():
     return "ZwerBo is alive!"
 
 def run():
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host='0.0.0.0', port=8080)
 
 def keep_alive():
     t = Thread(target=run)
