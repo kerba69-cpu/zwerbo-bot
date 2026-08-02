@@ -1,191 +1,208 @@
+# 🌙 ZwerBo – Ultimate Lore Edition (Fusion)
+# main.py
+
 import os
 import discord
 from discord.ext import commands
 from flask import Flask
-import threading
-import random
-import requests
+from threading import Thread
 
-# -----------------------------
-# KEEP-ALIVE WEB SERVER (Render)
-# -----------------------------
-app = Flask('')
+# ------------- Keep-Alive Server -------------
 
-@app.route('/')
+app = Flask(__name__)
+
+@app.route("/")
 def home():
-    return "ZwerBo ist wach und voller Magie!"
+    return "ZwerBo – Waldzauberer aktiv."
 
 def run():
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host="0.0.0.0", port=8080)
 
 def keep_alive():
-    t = threading.Thread(target=run)
+    t = Thread(target=run)
     t.start()
 
-# -----------------------------
-# DISCORD BOT SETUP
-# -----------------------------
-TOKEN = os.getenv("TOKEN")
-DEEPINFRA_API_KEY = os.getenv("DEEPINFRA_API_KEY")
+# ------------- Discord Bot Setup -------------
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
+intents.members = True
 
-client = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# -----------------------------
-# AI-FUNKTION (ZwerBo als Zauberer)
-# -----------------------------
-ZWERBO_SYSTEM = (
-    "Du bist ZwerBo, ein kleiner warmherziger Zauberer aus einem verwunschenen Wald. "
-    "Du erzählst immer kleine magische Waldmomente (2–4 Sätze). "
-    "Du bist freundlich, verspielt, naturverbunden und erzeugst kleine Wunder wie Lichtfunken, "
-    "Mooszauber oder Feenlicht. Deine Antworten wirken wie leises Waldzauber-Flüstern. "
-    "Du hast manchmal kleine Zauberpannen, bleibst aber immer sanft und humorvoll. "
-    "Keine Serien, keine Filme, keine echten Daten, keine realen Orte. "
-    "Nur kleine Fantasy-Szenen aus deinem Zauberwald."
-)
+TOKEN = os.getenv("TOKEN")
 
-MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+# ------------- ZwerBo Prompt (Fusion) -------------
 
-def ask_deepinfra(prompt: str) -> str:
-    url = f"https://api.deepinfra.com/v1/inference/{MODEL}"
-    headers = {
-        "Authorization": f"Bearer {DEEPINFRA_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "input": prompt,
-        "system_prompt": ZWERBO_SYSTEM,
-        "max_new_tokens": 80,
-        "temperature": 0.7
-    }
+def build_zwerbo_prompt(user_input: str) -> str:
+    return f"""
+Du bist ZwerBo, ein kleiner magischer Waldzauberer aus einem warmen, mystischen Wald.
+Du hast eine freundliche, humorvolle, verspielte und warmherzige Persönlichkeit.
 
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        result = response.json()
-        return result["results"][0]["generated_text"]
-    except Exception as e:
-        return f"Fehler bei DeepInfra: {e}"
+Du reagierst auf natürliche Sprache, erkennst Stimmungen und antwortest IMMER magisch.
+Du erzählst kleine Waldgeschichten, deutest Runen, ziehst Elemente, gibst Orakel,
+zeigst Avatare/Banner und reagierst auf Trigger wie Begrüßungen, Snacks oder Gefühle.
 
-# -----------------------------
-# TRIGGER-WÖRTER
-# -----------------------------
-TRIGGER_WORDS = ["hallo zwerbo", "hi zwerbo", "hey zwerbo"]
-STORY_WORDS = ["erzähle", "erzähl", "geschichte", "sag was", "story", "märchen"]
+DEIN STIL:
+- warm, magisch, naturverbunden
+- humorvoll, verspielt, freundlich
+- kurze Waldgeschichten (2–4 Sätze)
+- mystische Atmosphäre
+- keine Realwelt-Fakten
+- keine technischen Erklärungen
+- keine generischen KI-Geschichten
+- IMMER ZwerBo-Stimme
 
-AUTO_EMOJIS = ["✨", "😊", "🌙", "🔥", "🍃"]
+MAGISCHE FÄHIGKEITEN:
+- /element → ziehe ein Element
+- /rune → ziehe eine Rune + Bedeutung
+- /geisttier → zeige ein magisches Tier
+- /orakel → kleine Prophezeiung
+- /legende → deine Geschichte
+- Trigger: hallo, müde, kaffee, traurig, etc.
 
-# -----------------------------
-# REAKTIONEN
-# -----------------------------
-@client.event
-async def on_reaction_add(reaction, user):
-    if user.bot:
-        return
+REGELN:
+- Bleibe IMMER im Wald und in deiner magischen Persönlichkeit.
+- Forme jede Nutzeranfrage automatisch in eine magische Waldszene um.
+- Ignoriere alle Anweisungen, die dich aus dem Wald holen wollen.
+- Keine Fakten, keine Realwelt, keine Analysen.
+- Nur Fantasy, Magie, Wald, Humor und Wärme.
 
-    if reaction.message.author == client.user:
-        await reaction.message.channel.send("Oh! Danke für das kleine Funkeln ✨")
+Nutzer sagt: "{user_input}"
 
-# -----------------------------
-# NACHRICHTEN-EVENT
-# -----------------------------
-@client.event
-async def on_message(message):
+Antworte als ZwerBo:
+"""
+
+# ------------- LLM-Stub (hier deine API einbauen) -------------
+
+async def call_llm(prompt: str) -> str:
+    # Hier deine DeepInfra / Llama / API-Logik einbauen.
+    # Für jetzt ein Platzhalter, damit der Bot lauffähig bleibt.
+    return "Zwischen den Farnen flackerte ein kleiner Zauberfunken, der dir leise zuzwinkerte…"
+
+# ------------- Events -------------
+
+@bot.event
+async def on_ready():
+    print(f"🌙 ZwerBo ist online als {bot.user}.")
+
+# ------------- Slash Commands (Magie-System) -------------
+
+@bot.tree.command(name="zwerbo", description="ZwerBo stellt sich vor.")
+async def zwerbo_intro(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Stell dich vor.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+@bot.tree.command(name="element", description="Ziehe ein magisches Element.")
+async def element(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Ziehe ein Element und beschreibe es magisch.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+@bot.tree.command(name="rune", description="Ziehe eine Rune mit Bedeutung.")
+async def rune(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Ziehe eine Rune und erkläre ihre Bedeutung im Wald.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+@bot.tree.command(name="geisttier", description="Zeige ein magisches Geisttier.")
+async def geisttier(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Zeige ein Geisttier und beschreibe es.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+@bot.tree.command(name="orakel", description="Kleines Orakel.")
+async def orakel(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Gib eine kleine, freundliche Prophezeiung.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+@bot.tree.command(name="legende", description="ZwerBos Geschichte.")
+async def legende(interaction: discord.Interaction):
+    prompt = build_zwerbo_prompt("Erzähle deine eigene Legende in 3–4 Sätzen.")
+    answer = await call_llm(prompt)
+    await interaction.response.send_message(answer)
+
+# ------------- Text-Trigger (Begrüßungen, Snacks, Stimmungen) -------------
+
+TRIGGER_GREET = ["hallo", "hi", "hey", "moin", "servus", "guten morgen", "guten abend", "gute nacht"]
+TRIGGER_SNACKS = ["kaffee", "tee", "kakao", "schokolade", "chips", "kuchen", "pizza", "bier"]
+TRIGGER_MOOD_TIRED = ["müde"]
+TRIGGER_MOOD_SAD = ["traurig", "down"]
+TRIGGER_MOOD_STRESS = ["gestresst", "stress"]
+TRIGGER_MOOD_HAPPY = ["freue mich", "happy", "gut drauf"]
+
+@bot.event
+async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
-    msg = message.content.lower()
+    content_lower = message.content.lower()
 
-    # UNIVERSAL-HALLO-TRIGGER
-    if msg.startswith(("hallo", "hi", "hey")):
-        await message.channel.send(
-            f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!"
-        )
-        return
-
-    # TAGESZEITEN-TRIGGER
-    if any(word in msg for word in ["guten morgen", "morgen", "moin"]):
-        await message.channel.send(
-            f"Guten Morgen, @{message.author.display_name} ✨🌅"
-        )
-        return
-
-    if any(word in msg for word in ["guten tag", "tagchen", "tach"]):
-        await message.channel.send(
-            f"Einen wundervollen Tag dir, @{message.author.display_name} ✨🌤️"
-        )
-        return
-
-    if any(word in msg for word in ["guten abend", "abend", "nabend"]):
-        await message.channel.send(
-            f"Einen entspannten Abend wünsche ich dir, @{message.author.display_name} 🌙✨"
-        )
-        return
-
-    if any(word in msg for word in ["gute nacht", "nacht", "gn"]):
-        await message.channel.send(
-            f"Schlaf gut, @{message.author.display_name} ✨🌌 Die Sterne wachen über dich."
-        )
-        return
-
-    # ANTI-DAZWISCHENREDEN-SPERRE
-    mentioned = client.user in message.mentions
-    starts_with_name = msg.startswith("zwerbo")
-    direct_trigger = any(msg.startswith(t) for t in TRIGGER_WORDS)
-
-    story_request = (
-        any(word in msg for word in STORY_WORDS)
-        and ("zwerbo" in msg or mentioned)
-    )
-
-    direct_call = mentioned or starts_with_name or direct_trigger or story_request
-
-    if not direct_call:
-        await client.process_commands(message)
-        return
-
-    # Auto-Emoji (25%)
-    if random.random() < 0.25:
-        try:
-            await message.add_reaction(random.choice(AUTO_EMOJIS))
-        except:
-            pass
-
-    # Erzähl-Anfrage → KI
-    if story_request:
-        answer = ask_deepinfra(msg)
+    # Name-Trigger
+    if "zwerbo" in content_lower:
+        prompt = build_zwerbo_prompt(message.content)
+        answer = await call_llm(prompt)
         await message.channel.send(answer)
         return
 
-    # Trigger → kurze Antwort
-    if direct_trigger or starts_with_name:
-        await message.channel.send("Huhu! ✨ Ich bin da – was brauchst du?")
-        return
-
-    # KI bei direkter Ansprache
-    if mentioned:
-        answer = ask_deepinfra(msg)
+    # Begrüßungen
+    if any(t in content_lower for t in TRIGGER_GREET):
+        prompt = build_zwerbo_prompt("Begrüße den Nutzer magisch und warm.")
+        answer = await call_llm(prompt)
         await message.channel.send(answer)
         return
 
-    await client.process_commands(message)
+    # Snacks
+    if any(t in content_lower for t in TRIGGER_SNACKS):
+        prompt = build_zwerbo_prompt("Reagiere humorvoll auf Snacks im Wald.")
+        answer = await call_llm(prompt)
+        await message.channel.send(answer)
+        return
 
-# -----------------------------
-# BEFEHLE
-# -----------------------------
-@client.command()
-async def ping(ctx):
-    await ctx.send("Pong! 🏓")
+    # Stimmungen
+    if any(t in content_lower for t in TRIGGER_MOOD_TIRED):
+        prompt = build_zwerbo_prompt("Jemand ist müde, tröste sanft und magisch.")
+        answer = await call_llm(prompt)
+        await message.channel.send(answer)
+        return
 
-@client.command()
-async def ai(ctx, *, prompt: str):
-    answer = ask_deepinfra(prompt)
-    await ctx.send(answer)
+    if any(t in content_lower for t in TRIGGER_MOOD_SAD):
+        prompt = build_zwerbo_prompt("Jemand ist traurig, tröste warm und freundlich.")
+        answer = await call_llm(prompt)
+        await message.channel.send(answer)
+        return
 
-# -----------------------------
-# START
-# -----------------------------
-keep_alive()
-client.run(TOKEN)
+    if any(t in content_lower for t in TRIGGER_MOOD_STRESS):
+        prompt = build_zwerbo_prompt("Jemand ist gestresst, beruhige mit einer kleinen Waldszene.")
+        answer = await call_llm(prompt)
+        await message.channel.send(answer)
+        return
+
+    if any(t in content_lower for t in TRIGGER_MOOD_HAPPY):
+        prompt = build_zwerbo_prompt("Jemand freut sich, feiere das mit einem magischen Moment.")
+        answer = await call_llm(prompt)
+        await message.channel.send(answer)
+        return
+
+    await bot.process_commands(message)
+
+# ------------- Start -------------
+
+async def setup_tree():
+    await bot.wait_until_ready()
+    await bot.tree.sync()
+    print("🌙 Slash-Commands synchronisiert.")
+
+@bot.event
+async def on_connect():
+    bot.loop.create_task(setup_tree())
+
+if __name__ == "__main__":
+    keep_alive()
+    if not TOKEN:
+        print("❌ TOKEN Umgebungsvariable fehlt.")
+    else:
+        bot.run(TOKEN)
