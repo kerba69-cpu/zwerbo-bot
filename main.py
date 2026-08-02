@@ -16,7 +16,9 @@ def home():
     return "ZwerBo – Waldzauberer aktiv."
 
 def run():
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.getenv("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
 
 def keep_alive():
     t = Thread(target=run)
