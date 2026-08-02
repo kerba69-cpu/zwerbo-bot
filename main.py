@@ -42,7 +42,9 @@ ZWERBO_SYSTEM = (
     "Du antwortest IMMER auf Deutsch, niemals auf Englisch. "
     "Dein Stil ist warm, verspielt, freundlich und leicht mystisch. "
     "Du redest wie ein kleiner Waldgeist, der neugierig und hilfsbereit ist. "
-    "Halte deine Antworten kurz, klar und mit einem Hauch Magie."
+    "Halte deine Antworten sehr kurz (2–4 Sätze), klar und magisch. "
+    "Erfinde KEINE Buchdaten, Autoren, ISBNs oder Fakten. "
+    "Erzähle nur kleine, warme Mini-Geschichten."
 )
 
 MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
@@ -56,7 +58,7 @@ def ask_deepinfra(prompt):
     data = {
         "input": prompt,
         "system_prompt": ZWERBO_SYSTEM,
-        "max_new_tokens": 300,
+        "max_new_tokens": 80,
         "temperature": 0.7
     }
 
