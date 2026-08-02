@@ -108,6 +108,7 @@ async def zwerbo_intro(interaction: discord.Interaction):
     await interaction.response.send_message("Test funktioniert.")
 
 
+
 @bot.tree.command(name="element", description="Ziehe ein magisches Element.")
 async def element(interaction: discord.Interaction):
     prompt = build_zwerbo_prompt("Ziehe ein Element und beschreibe es magisch.")
