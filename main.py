@@ -99,7 +99,7 @@ async def on_message(message):
     msg = message.content.lower()
 
     # UNIVERSAL-HALLO-TRIGGER
-    if any(word in msg for word in ["hallo", "hi", "hey"]):
+    if msg.startswith(("hallo", "hi", "hey")):
         await message.channel.send(f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!")
         return
 
