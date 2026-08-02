@@ -78,7 +78,7 @@ Antworte als ZwerBo:
 
 # ------------- LLM-Stub (hier deine API einbauen) -------------
 
-aimport aiohttp
+import aiohttp
 
 async def call_llm(prompt: str) -> str:
     url = "https://api.deepinfra.com/v1/openai/chat/completions"
