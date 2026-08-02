@@ -99,7 +99,6 @@ async def call_llm(prompt: str) -> str:
         async with session.post(url, headers=headers, json=payload) as resp:
             data = await resp.json()
 
-            # Debug-Ausgabe ins Render-Log
             print("LLM Antwort:", data)
 
             try:
