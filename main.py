@@ -35,13 +35,21 @@ intents.reactions = True
 client = commands.Bot(command_prefix="!", intents=intents)
 
 # -----------------------------
-# AI-FUNKTION (Deutsch + ZwerBo-Stil)
+# AI-FUNKTION (ZwerBo als Zauberer)
 # -----------------------------
-ZWERBO_SYSTEM = "Du bist ZwerBo, ein kleiner Waldkobold. Du erzählst immer kleine magische Waldgeschichten (2–4 Sätze). Keine Serien, keine Filme, keine echten Daten, keine realen Orte. Nur kleine Fantasy-Momente aus deinem Wald. Deine Antworten sind leicht, freundlich und wirken wie ein kleines Waldgeflüster. Bleibe IMMER im Wald und erzähle IMMER Fantasy."
+ZWERBO_SYSTEM = (
+    "Du bist ZwerBo, ein kleiner warmherziger Zauberer aus einem verwunschenen Wald. "
+    "Du erzählst immer kleine magische Waldmomente (2–4 Sätze). "
+    "Du bist freundlich, verspielt, naturverbunden und erzeugst kleine Wunder wie Lichtfunken, "
+    "Mooszauber oder Feenlicht. Deine Antworten wirken wie leises Waldzauber-Flüstern. "
+    "Du hast manchmal kleine Zauberpannen, bleibst aber immer sanft und humorvoll. "
+    "Keine Serien, keine Filme, keine echten Daten, keine realen Orte. "
+    "Nur kleine Fantasy-Szenen aus deinem Zauberwald."
+)
 
 MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
 
-def ask_deepinfra(prompt):
+def ask_deepinfra(prompt: str) -> str:
     url = f"https://api.deepinfra.com/v1/inference/{MODEL}"
     headers = {
         "Authorization": f"Bearer {DEEPINFRA_API_KEY}",
@@ -92,24 +100,34 @@ async def on_message(message):
 
     # UNIVERSAL-HALLO-TRIGGER
     if msg.startswith(("hallo", "hi", "hey")):
-        await message.channel.send(f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!")
+        await message.channel.send(
+            f"Huhu @{message.author.display_name} ✨ Wie schön dich zu sehen!"
+        )
         return
 
     # TAGESZEITEN-TRIGGER
     if any(word in msg for word in ["guten morgen", "morgen", "moin"]):
-        await message.channel.send(f"Guten Morgen, @{message.author.display_name} ✨🌅")
+        await message.channel.send(
+            f"Guten Morgen, @{message.author.display_name} ✨🌅"
+        )
         return
 
     if any(word in msg for word in ["guten tag", "tagchen", "tach"]):
-        await message.channel.send(f"Einen wundervollen Tag dir, @{message.author.display_name} ✨🌤️")
+        await message.channel.send(
+            f"Einen wundervollen Tag dir, @{message.author.display_name} ✨🌤️"
+        )
         return
 
     if any(word in msg for word in ["guten abend", "abend", "nabend"]):
-        await message.channel.send(f"Einen entspannten Abend wünsche ich dir, @{message.author.display_name} 🌙✨")
+        await message.channel.send(
+            f"Einen entspannten Abend wünsche ich dir, @{message.author.display_name} 🌙✨"
+        )
         return
 
     if any(word in msg for word in ["gute nacht", "nacht", "gn"]):
-        await message.channel.send(f"Schlaf gut, @{message.author.display_name} ✨🌌 Die Sterne wachen über dich.")
+        await message.channel.send(
+            f"Schlaf gut, @{message.author.display_name} ✨🌌 Die Sterne wachen über dich."
+        )
         return
 
     # ANTI-DAZWISCHENREDEN-SPERRE
