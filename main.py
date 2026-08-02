@@ -103,11 +103,10 @@ async def on_ready():
 
 # ------------- Slash Commands (Magie-System) -------------
 
-@bot.tree.command(name="zwerbo", description="ZwerBo stellt sich vor.")
+@bot.tree.command(name="zwerbo", description="Test ohne LLM")
 async def zwerbo_intro(interaction: discord.Interaction):
-    prompt = build_zwerbo_prompt("Stell dich vor.")
-    answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.response.send_message("Test funktioniert.")
+
 
 @bot.tree.command(name="element", description="Ziehe ein magisches Element.")
 async def element(interaction: discord.Interaction):
