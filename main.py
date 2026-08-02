@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 from flask import Flask
 from threading import Thread
+import aiohttp
 
 # ------------- Keep-Alive Server -------------
 
