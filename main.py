@@ -79,20 +79,35 @@ Antworte als ZwerBo:
 # ------------- LLM-Stub (hier deine API einbauen) -------------
 
 import aiohttp
+import os
 
 async def call_llm(prompt: str) -> str:
     url = "https://api.deepinfra.com/v1/openai/chat/completions"
-    headers = {"Authorization": f"Bearer {os.getenv('DEEPINFRA_TOKEN')}"}
+    headers = {
+        "Authorization": f"Bearer {os.getenv('DEEPINFRA_TOKEN')}",
+        "Content-Type": "application/json"
+    }
+
     payload = {
         "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 200
+        "max_tokens": 200,
+        "temperature": 0.7
     }
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=payload) as resp:
             data = await resp.json()
-            return data["choices"][0]["message"]["content"]
+
+            # Debug-Ausgabe ins Render-Log
+            print("LLM Antwort:", data)
+
+            try:
+                return data["choices"][0]["message"]["content"]
+            except Exception as e:
+                print("Fehler im LLM-Call:", e)
+                return "Ein kleiner Funken knisterte, aber die Magie kam nicht ganz durch…"
+
 
 
 # ------------- Events -------------
