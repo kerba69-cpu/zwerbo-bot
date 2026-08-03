@@ -122,36 +122,44 @@ async def zwerbo_intro(interaction: discord.Interaction):
     await interaction.response.send_message("Test funktioniert.")
 
 
-
 @bot.tree.command(name="element", description="Ziehe ein magisches Element.")
 async def element(interaction: discord.Interaction):
+    await interaction.response.defer()
     prompt = build_zwerbo_prompt("Ziehe ein Element und beschreibe es magisch.")
     answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.followup.send(answer)
+
 
 @bot.tree.command(name="rune", description="Ziehe eine Rune mit Bedeutung.")
 async def rune(interaction: discord.Interaction):
+    await interaction.response.defer()
     prompt = build_zwerbo_prompt("Ziehe eine Rune und erkläre ihre Bedeutung im Wald.")
     answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.followup.send(answer)
+
 
 @bot.tree.command(name="geisttier", description="Zeige ein magisches Geisttier.")
 async def geisttier(interaction: discord.Interaction):
+    await interaction.response.defer()
     prompt = build_zwerbo_prompt("Zeige ein Geisttier und beschreibe es.")
     answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.followup.send(answer)
+
 
 @bot.tree.command(name="orakel", description="Kleines Orakel.")
 async def orakel(interaction: discord.Interaction):
+    await interaction.response.defer()
     prompt = build_zwerbo_prompt("Gib eine kleine, freundliche Prophezeiung.")
     answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.followup.send(answer)
+
 
 @bot.tree.command(name="legende", description="ZwerBos Geschichte.")
 async def legende(interaction: discord.Interaction):
+    await interaction.response.defer()
     prompt = build_zwerbo_prompt("Erzähle deine eigene Legende in 3–4 Sätzen.")
     answer = await call_llm(prompt)
-    await interaction.response.send_message(answer)
+    await interaction.followup.send(answer)
 
 # ------------- Text-Trigger (Begrüßungen, Snacks, Stimmungen) -------------
 
