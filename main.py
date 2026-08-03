@@ -225,14 +225,16 @@ async def on_message(message: discord.Message):
 
 # ------------- Start -------------
 
-async def setup_tree():
-    await bot.wait_until_ready()
-    await bot.tree.sync()
-    print("🌙 Slash-Commands synchronisiert.")
-
 @bot.event
-async def on_connect():
-    bot.loop.create_task(setup_tree())
+async def on_ready():
+    print(f"🌙 ZwerBo ist online als {bot.user}.")
+
+    try:
+        synced = await bot.tree.sync()
+        print(f"✅ {len(synced)} Slash Commands synchronisiert.")
+    except Exception as e:
+        print(f"❌ Sync Fehler: {e}")
+
 
 if __name__ == "__main__":
     keep_alive()
