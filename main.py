@@ -115,12 +115,6 @@ async def call_llm(prompt: str) -> str:
 
 
 
-# ------------- Events -------------
-
-@bot.event
-async def on_ready():
-    print(f"🌙 ZwerBo ist online als {bot.user}.")
-
 # ------------- Slash Commands (Magie-System) -------------
 
 @bot.tree.command(name="zwerbo", description="Test ohne LLM")
