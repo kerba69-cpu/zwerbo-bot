@@ -80,8 +80,6 @@ Antworte als ZwerBo:
 # ------------- LLM-Stub (hier deine API einbauen) -------------
 
 async def call_llm(prompt: str) -> str:
-    print("Prompt an LLM:", prompt)   # Debug 1
-
     url = "https://api.deepinfra.com/v1/openai/chat/completions"
     headers = {
         "Authorization": f"Bearer {os.getenv('DEEPINFRA_TOKEN')}",
@@ -90,7 +88,16 @@ async def call_llm(prompt: str) -> str:
 
     payload = {
         "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {
+                "role": "system",
+                "content": "Du bist ZwerBo, ein kleiner Waldmagier im mystischen Waldgeflüster..."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
         "max_tokens": 200,
         "temperature": 0.7
     }
@@ -99,11 +106,8 @@ async def call_llm(prompt: str) -> str:
         async with session.post(url, headers=headers, json=payload) as resp:
             data = await resp.json()
 
-            print("LLM Antwort:", data)   # Debug 2
-
             try:
                 return data["results"][0]["generated_text"]
-                
             except Exception as e:
                 print("Fehler im LLM-Call:", e)
                 return "Ein kleiner Funken knisterte, aber die Magie kam nicht ganz durch…"
