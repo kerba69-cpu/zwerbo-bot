@@ -102,7 +102,8 @@ async def call_llm(prompt: str) -> str:
             print("LLM Antwort:", data)   # Debug 2
 
             try:
-                return data["choices"][0]["message"]["content"]
+                return data["results"][0]["generated_text"]
+                
             except Exception as e:
                 print("Fehler im LLM-Call:", e)
                 return "Ein kleiner Funken knisterte, aber die Magie kam nicht ganz durch…"
